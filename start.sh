@@ -14,24 +14,30 @@ if [ ! -d "$ROOT/frontend/node_modules" ]; then
   cd "$ROOT/frontend" && npm install
 fi
 
-# ── Start backend ───────────────────────────────────────────────────────────────
-echo "→ Starting backend on http://localhost:8000"
+# ── Detect local IP for network access (iPad etc.) ─────────────────────────────
+LOCAL_IP=$(ipconfig getifaddr en0 2>/dev/null || \
+           ip route get 1 2>/dev/null | awk '{print $7; exit}' || \
+           echo "localhost")
+
+# ── Start backend (bind to all interfaces) ─────────────────────────────────────
+echo "→ Starting backend on http://0.0.0.0:8000"
 cd "$ROOT/backend"
-uvicorn main:app --reload --port 8000 &
+uvicorn main:app --reload --host 0.0.0.0 --port 8000 &
 BACKEND_PID=$!
 
-# ── Start frontend ──────────────────────────────────────────────────────────────
-echo "→ Starting frontend on http://localhost:5173"
+# ── Start frontend (bind to all interfaces) ────────────────────────────────────
+echo "→ Starting frontend on http://0.0.0.0:5173"
 cd "$ROOT/frontend"
-npm run dev &
+npm run dev -- --host &
 FRONTEND_PID=$!
 
 # ── Cleanup on Ctrl+C ───────────────────────────────────────────────────────────
 trap "echo '→ Stopping...'; kill $BACKEND_PID $FRONTEND_PID 2>/dev/null; exit 0" INT TERM
 
 echo ""
-echo "  App running at http://localhost:5173"
-echo "  API docs at  http://localhost:8000/docs"
+echo "  Local:  http://localhost:5173"
+echo "  iPad:   http://${LOCAL_IP}:5173"
+echo "  API:    http://localhost:8000/docs"
 echo "  Press Ctrl+C to stop"
 echo ""
 
