@@ -30,7 +30,9 @@ struct CollectionSidebar: View {
                 if isCreating {
                     TextField("Name", text: $newName)
                         .onSubmit { createCollection() }
+                        #if os(macOS)
                         .onExitCommand { isCreating = false }
+                        #endif
                 }
             }
         }
@@ -67,7 +69,9 @@ private struct CollectionRow: View {
             TextField("Name", text: $editName)
                 .onAppear { editName = collection.name }
                 .onSubmit { commitRename() }
+                #if os(macOS)
                 .onExitCommand { renaming = nil }
+                #endif
         } else {
             Label(collection.name, systemImage: "folder")
                 .badge(collection.imageCount)
