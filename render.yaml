@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: doublenegative
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    plan: free          # change to "starter" for persistent disk support
+    envVars:
+      - key: DN_STORAGE_ROOT
+        value: /data
+      - key: PORT
+        value: 8000
+    # Uncomment and add a disk for persistent image storage:
+    # disk:
+    #   name: doublenegative-data
+    #   mountPath: /data
+    #   sizeGB: 10
